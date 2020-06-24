@@ -13,8 +13,8 @@ import functools
 import timeit
 import cProfile
 import pstats
-import re
 from pstats import SortKey
+from collections import Counter
 
 
 def profile(func):
@@ -41,29 +41,34 @@ def read_movies(src):
         return f.read().splitlines()
 
 
-def is_duplicate(title, movies):
-    """Returns True if title is within movies list."""
-    for movie in movies:
-        if movie.lower() == title.lower():
-            return True
-    return False
 # def is_duplicate(title, movies):
 #     """Returns True if title is within movies list."""
-#     movie_list_string = ' '.join(movies)
-#     # for movie in movies:
-#     if re.search(title, movie_list_string):
-#         return True
+#     for movie in movies:
+#         if movie.lower() == title.lower():
+#             return True
 #     return False
 
 
 # @profile
-def find_duplicate_movies(src):
+# def find_duplicate_movies(src):
+#     """Returns a list of duplicate movies from a src list."""
+#     movies = read_movies(src)
+#     duplicates = []
+#     while movies:
+#         movie = movies.pop()
+#         if is_duplicate_improved2(movie, movies):
+#             duplicates.append(movie)
+#     return duplicates
+
+
+@profile
+def find_duplicate_movies_improved(src):
     """Returns a list of duplicate movies from a src list."""
     movies = read_movies(src)
+    c = Counter(movies)
     duplicates = []
-    while movies:
-        movie = movies.pop()
-        if is_duplicate(movie, movies):
+    for movie in c:
+        if c.get(movie) > 1:
             duplicates.append(movie)
     return duplicates
 
@@ -78,14 +83,14 @@ def timeit_helper(src):
     return result
 
 
-@timeit_helper
+# @timeit_helper
 def main():
     """Computes a list of duplicate movie entries."""
-    result = find_duplicate_movies('movies.txt')
+    result = find_duplicate_movies_improved('movies.txt')
     print(f'Found {len(result)} duplicate movies:')
     print('\n'.join(result))
 
 
-if __name__ == '__timeit_helper__':
-    # if __name__ == '__main__':
+# if __name__ == '__timeit_helper__':
+if __name__ == '__main__':
     main()
