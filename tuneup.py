@@ -41,56 +41,73 @@ def read_movies(src):
         return f.read().splitlines()
 
 
-# def is_duplicate(title, movies):
-#     """Returns True if title is within movies list."""
-#     for movie in movies:
-#         if movie.lower() == title.lower():
-#             return True
-#     return False
+def is_duplicate(title, movies):
+    """Returns True if title is within movies list."""
+    for movie in movies:
+        if movie.lower() == title.lower():
+            return True
+    return False
 
 
-# @profile
-# def find_duplicate_movies(src):
-#     """Returns a list of duplicate movies from a src list."""
-#     movies = read_movies(src)
-#     duplicates = []
-#     while movies:
-#         movie = movies.pop()
-#         if is_duplicate_improved2(movie, movies):
-#             duplicates.append(movie)
-#     return duplicates
+def find_duplicate_movies(src):
+    """Returns a list of duplicate movies from a src list."""
+    movies = read_movies(src)
+    duplicates = []
+    while movies:
+        movie = movies.pop()
+        if is_duplicate(movie, movies):
+            duplicates.append(movie)
+    return duplicates
 
 
-@profile
+def timeit_helper(func_name, func_param):
+    """Part A: Obtain some profiling measurements using timeit."""
+    assert isinstance(func_name, str)
+    st = f"{func_name}('{func_param}')"
+    setu = (
+        f'from {__name__} import {func_name} as {func_name}; '
+        f'func_param = "{func_param}"'
+    )
+    t = timeit.Timer(stmt=st, setup=setu)
+    result = t.repeat(repeat=5, number=3)
+    average_result = min(result) / 3
+    print(
+        f'Best time across 5 repeats of 3 runs per repeat: {average_result} sec')
+    return result
+
+
 def find_duplicate_movies_improved(src):
     """Returns a list of duplicate movies from a src list."""
     movies = read_movies(src)
     c = Counter(movies)
     duplicates = []
     for movie in c:
-        if c.get(movie) > 1:
+        if c[movie] > 1:
             duplicates.append(movie)
     return duplicates
 
 
-def timeit_helper(src):
-    """Part A: Obtain some profiling measurements using timeit."""
-    t = timeit.Timer(src)
-    result = t.repeat(repeat=5, number=3)
-    average_result = min(result)
-    print(
-        f'Best time across 5 repeats of 3 runs per repeat: {average_result} sec')
-    return result
-
-
-# @timeit_helper
 def main():
     """Computes a list of duplicate movie entries."""
-    result = find_duplicate_movies_improved('movies.txt')
+    filename = 'movies.txt'
+
+    print("--- Before optimization ---")
+    result = find_duplicate_movies(filename)
     print(f'Found {len(result)} duplicate movies:')
     print('\n'.join(result))
 
+    print("\n--- Timeit results, before optimization ---")
+    timeit_helper('find_duplicate_movies', filename)
 
-# if __name__ == '__timeit_helper__':
+    print("\n--- Timeit results, after optimization ---")
+    timeit_helper('find_duplicate_movies_improved', filename)
+
+    print("\n--- cProfile results, before optimization ---")
+    profile(find_duplicate_movies)(filename)
+
+    print("\n--- cProfile results, after optimization ---")
+    profile(find_duplicate_movies_improved)(filename)
+
+
 if __name__ == '__main__':
     main()
